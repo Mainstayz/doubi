@@ -144,7 +144,6 @@ PASSWORD = ${mtp_passwd}
 TAG = ${mtp_tag}
 NAT-IPv4 = ${mtp_nat_ipv4}
 NAT-IPv6 = ${mtp_nat_ipv6}
-SECURE = ${mtp_secure}
 EOF
 }
 Read_config(){
@@ -154,7 +153,6 @@ Read_config(){
 	tag=$(cat ${mtproxy_conf}|grep 'TAG = '|awk -F 'TAG = ' '{print $NF}')
 	nat_ipv4=$(cat ${mtproxy_conf}|grep 'NAT-IPv4 = '|awk -F 'NAT-IPv4 = ' '{print $NF}')
 	nat_ipv6=$(cat ${mtproxy_conf}|grep 'NAT-IPv6 = '|awk -F 'NAT-IPv6 = ' '{print $NF}')
-	secure=$(cat ${mtproxy_conf}|grep 'SECURE = '|awk -F 'SECURE = ' '{print $NF}')
 }
 Set_port(){
 	while true
@@ -232,20 +230,6 @@ Set_nat(){
 		echo "========================" && echo
 	fi
 }
-Set_secure(){
-	echo -e "是否启用强制安全模式？[Y/n]
-只有启用[安全混淆模式]的客户端才能链接(即密匙头部有 dd 字符)，降低服务器被墙几率，建议开启。"
-	read -e -p "(默认：Y 启用):" mtp_secure
-	[[ -z "${mtp_secure}" ]] && mtp_secure="Y"
-	if [[ "${mtp_secure}" == [Yy] ]]; then
-		mtp_secure="YES"
-	else
-		mtp_secure="NO"
-	fi
-	echo && echo "========================"
-	echo -e "	强制安全模式 : ${Red_background_prefix} ${mtp_secure} ${Font_color_suffix}"
-	echo "========================" && echo
-}
 Set(){
 	check_installed_status
 	echo && echo -e "你要做什么？
@@ -253,7 +237,6 @@ Set(){
  ${Green_font_prefix}2.${Font_color_suffix}  修改 密码配置
  ${Green_font_prefix}3.${Font_color_suffix}  修改 TAG 配置
  ${Green_font_prefix}4.${Font_color_suffix}  修改 NAT 配置
- ${Green_font_prefix}5.${Font_color_suffix}  修改 强制安全模式 配置
  ${Green_font_prefix}6.${Font_color_suffix}  修改 全部配置
 ————————————————
  ${Green_font_prefix}7.${Font_color_suffix}  监控 运行状态
@@ -267,7 +250,6 @@ Set(){
 		mtp_tag=${tag}
 		mtp_nat_ipv4=${nat_ipv4}
 		mtp_nat_ipv6=${nat_ipv6}
-		mtp_secure=${secure}
 		Write_config
 		Del_iptables
 		Add_iptables
@@ -279,7 +261,6 @@ Set(){
 		mtp_tag=${tag}
 		mtp_nat_ipv4=${nat_ipv4}
 		mtp_nat_ipv6=${nat_ipv6}
-		mtp_secure=${secure}
 		Write_config
 		Restart
 	elif [[ "${mtp_modify}" == "3" ]]; then
@@ -289,7 +270,6 @@ Set(){
 		mtp_passwd=${passwd}
 		mtp_nat_ipv4=${nat_ipv4}
 		mtp_nat_ipv6=${nat_ipv6}
-		mtp_secure=${secure}
 		Write_config
 		Restart
 	elif [[ "${mtp_modify}" == "4" ]]; then
@@ -298,17 +278,6 @@ Set(){
 		mtp_port=${port}
 		mtp_passwd=${passwd}
 		mtp_tag=${tag}
-		mtp_secure=${secure}
-		Write_config
-		Restart
-	elif [[ "${mtp_modify}" == "5" ]]; then
-		Read_config
-		Set_secure
-		mtp_port=${port}
-		mtp_passwd=${passwd}
-		mtp_tag=${tag}
-		mtp_nat_ipv4=${nat_ipv4}
-		mtp_nat_ipv6=${nat_ipv6}
 		Write_config
 		Restart
 	elif [[ "${mtp_modify}" == "6" ]]; then
@@ -317,7 +286,6 @@ Set(){
 		Set_passwd
 		Set_tag
 		Set_nat
-		Set_secure
 		Write_config
 		Restart
 	elif [[ "${mtp_modify}" == "7" ]]; then
@@ -336,7 +304,6 @@ Install(){
 	Set_passwd
 	Set_tag
 	Set_nat
-	Set_secure
 	echo -e "${Info} 开始安装/配置 依赖..."
 	Installation_dependency
 	echo -e "${Info} 开始下载/安装..."
@@ -449,7 +416,6 @@ View(){
 	[[ ! -z "${nat_ipv6}" ]] && echo -e " 链接\t: ${Red_font_prefix}tg://proxy?server=${nat_ipv6}&port=${port}&secret=dd${passwd}${Font_color_suffix}"
 	[[ ! -z "${nat_ipv6}" ]] && echo -e " 链接\t: ${Red_font_prefix}https://t.me/proxy?server=${nat_ipv6}&port=${port}&secret=dd${passwd}${Font_color_suffix}"
 	echo
-	echo -e " 强制安全模式\t: ${Green_font_prefix}${secure}${Font_color_suffix}"
 	echo
 	echo -e " ${Red_font_prefix}注意\t:${Font_color_suffix} 密匙头部的 ${Green_font_prefix}dd${Font_color_suffix} 字符是代表客户端启用${Green_font_prefix}安全混淆模式${Font_color_suffix}，可以降低服务器被墙几率。\n     \t  另外，在官方机器人处分享账号获取TAG标签时记得删除，获取TAG标签后分享时可以再加上。"
 }
@@ -659,7 +625,6 @@ crontab_monitorip(){
 		mtp_port=${port}
 		mtp_passwd=${passwd}
 		mtp_tag=${tag}
-		mtp_secure=${secure}
 		Write_config
 		Restart
 	fi
